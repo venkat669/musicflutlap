@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //  Global variable
 List<PlatformFile>?
     Selectedfiles; // this holds the list of files selected by the user
 
 List<File> mp3s = [];
+
 final player = AudioPlayer();
 // final playlist = ConcatenatingAudioSource(
 //   children: [
@@ -17,6 +19,7 @@ final player = AudioPlayer();
 //   ],
 // );
 int i = 0;
+List<String>? paths;
 
 class Thirdpg extends StatefulWidget {
   const Thirdpg({super.key});
@@ -56,14 +59,38 @@ class _ThirdpgState extends State<Thirdpg> {
   Future<void> fetchSavedFiles() async {
     Directory appStorage = await getApplicationDocumentsDirectory();
     List<FileSystemEntity> files = appStorage.listSync();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    paths = [];
 
     mp3s.clear(); // Clear previous files
 
     for (FileSystemEntity entity in files) {
       if (entity is File && entity.path.endsWith('.mp3')) {
         mp3s.add(entity);
+        paths!.add(entity.path);
       }
     }
+    // Save the paths to SharedPreferences
+    await prefs.setStringList('mp3List', paths!);
+  }
+
+  Future<void> loadsavedFiles() async {
+    SharedPreferences prefer = await SharedPreferences.getInstance();
+    paths = [];
+
+    paths = prefer.getStringList('mp3List');
+    if (paths != null) {
+      mp3s.clear();
+      for (String path in paths!) {
+        mp3s.add(File(path));
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadsavedFiles();
   }
 
   @override
