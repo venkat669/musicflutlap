@@ -3,12 +3,20 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:just_audio/just_audio.dart';
 
 //  Global variable
 List<PlatformFile>?
     Selectedfiles; // this holds the list of files selected by the user
 
-List<PlatformFile> mp3s = [];
+List<File> mp3s = [];
+final player = AudioPlayer();
+// final playlist = ConcatenatingAudioSource(
+//   children: [
+//     for (File file in mp3s) AudioSource.file(file.path),
+//   ],
+// );
+int i = 0;
 
 class Thirdpg extends StatefulWidget {
   const Thirdpg({super.key});
@@ -23,27 +31,39 @@ class _ThirdpgState extends State<Thirdpg> {
         .pickFiles(allowMultiple: true, type: FileType.audio);
 
     if (result != null) {
-      setState(() {
-        //  since we use SetState()  we need to write this function inside "State<thirdpg>" Since it extends the state class
-        Selectedfiles = result.files;
+      // Handle file saving and fetching asynchronously
+      Selectedfiles = result.files;
 
-        for (var file in Selectedfiles!) {
-          if (!mp3s.any((element) => element.name == file.name)) {
-            mp3s.add(file);
-          } else {
-            print("contains file");
-          }
-        }
-      });
-      // selectedfiles are defines in top of page
+      for (var file in Selectedfiles!) {
+        final newfile = await saveflieperma(file); // Save the file permanently
+      }
+
+      // Fetch the saved files from the directory
+      await fetchSavedFiles();
+
+      // Update the UI
+      setState(() {});
     }
   }
 
   Future<File> saveflieperma(PlatformFile file) async {
     final appstorage = await getApplicationDocumentsDirectory();
-    final addedfile = File('${appstorage}/${file.name}');
+    final addedfile = File('${appstorage.path}/${file.name}');
 
     return File(file.path!).copy(addedfile.path);
+  }
+
+  Future<void> fetchSavedFiles() async {
+    Directory appStorage = await getApplicationDocumentsDirectory();
+    List<FileSystemEntity> files = appStorage.listSync();
+
+    mp3s.clear(); // Clear previous files
+
+    for (FileSystemEntity entity in files) {
+      if (entity is File && entity.path.endsWith('.mp3')) {
+        mp3s.add(entity);
+      }
+    }
   }
 
   @override
@@ -52,7 +72,7 @@ class _ThirdpgState extends State<Thirdpg> {
       appBar: AppBar(
         title: Text("third page"),
       ),
-      body: Column(children: [
+      body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Container(
           padding: EdgeInsets.all(10),
           child: TextButton(
@@ -65,14 +85,21 @@ class _ThirdpgState extends State<Thirdpg> {
           child: Selectedfiles == null
               ? Center(child: Text("No files selected"))
               : ListView.builder(
-                  itemCount: mp3s!.length,
+                  itemCount: mp3s.length,
                   itemBuilder: (BuildContext context, int index) {
-                    var file = mp3s![index];
+                    var file = mp3s[index];
                     return ListTile(
                       tileColor: Colors.grey.shade600,
-                      title: Text("Name: ${file.name}"),
-                      subtitle: Text("Size: ${file.size} bytes"),
-                      onTap: () {},
+                      title: Text("Name: ${file.path.split('/').last}"),
+                      subtitle: Column(
+                        children: [
+                          Text("Path: ${file.path}"),
+                          Text("size: ${file.length()}"),
+                        ],
+                      ),
+                      onTap: () {
+                        player.setAudioSource(AudioSource.file(file.path));
+                      },
                     );
                   },
                 ),
@@ -81,7 +108,35 @@ class _ThirdpgState extends State<Thirdpg> {
           child: Column(
             children: [
               Row(
-                children: [],
+                children: [
+                  ButtonBar(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          if (i % 2 == 0) {
+                            player.play();
+                            i++;
+                          } else {
+                            i = 0;
+                            player.pause();
+                          }
+                        },
+                        icon: Icon(Icons.play_arrow_rounded),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            player.seek(Duration(seconds: 10));
+                          },
+                          icon: Icon(Icons.fast_forward)),
+                      IconButton(
+                          onPressed: () {
+                            player.seek(Duration(seconds: -10));
+                          },
+                          icon: Icon(Icons.fast_rewind)),
+                    ],
+                  )
+                ],
               )
             ],
           ),
