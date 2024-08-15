@@ -28,7 +28,9 @@ class _xylopState extends State<xylop> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text("firstpage"),
+      ),
       body: Container(
         child: Column(
           children: [

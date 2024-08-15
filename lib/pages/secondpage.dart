@@ -14,7 +14,7 @@ class SecondPage extends StatefulWidget {
 
 class _SecondPageState extends State<SecondPage> {
   late AudioPlayer player = AudioPlayer();
-  List<File> mp3Files = [];
+  List<FileSystemEntity> mp3Files = [];
 
   @override
   void initState() {
@@ -75,27 +75,44 @@ class _SecondPageState extends State<SecondPage> {
     );
   }
 
-  Future<List<File>> _fetchMp3Files() async {
+  Future<List<FileSystemEntity>> _fetchMp3Files() async {
     if (await _requestPermission()) {
-      Directory? rootDirectory = Directory('/storage/emulated/0');
+      Directory? rootDirectory = Directory('/Storage/Download/');
       return await _scanDirectoryForMp3(rootDirectory);
     }
     return [];
   }
 
-  Future<List<File>> _scanDirectoryForMp3(Directory directory) async {
-    List<File> mp3Files = [];
-    try {
-      var entities = directory.listSync(recursive: true);
-      for (var entity in entities) {
-        if (entity is File && entity.path.endsWith('.mp3')) {
-          mp3Files.add(entity);
-        }
+  Future<List<FileSystemEntity>> _scanDirectoryForMp3(
+      Directory directory) async {
+    // List<File> mp3Files = [];
+    // try {
+    //   var entities = directory.listSync(recursive: true);
+    //   for (var entity in entities) {
+    //     if (entity is File && entity.path.endsWith('.mp3')) {
+    //       mp3Files.add(entity);
+    //     }
+    //   }
+    // } catch (e) {
+    //   print("Error: $e");
+    // }
+    // return mp3Files;
+
+    String mp3path = directory.toString();
+    print(mp3path);
+    List<FileSystemEntity> _files;
+    List<FileSystemEntity> _songs = [];
+    _files = directory.listSync(recursive: true, followLinks: false);
+    for (FileSystemEntity entity in _files) {
+      String path = entity.path;
+      if (path.endsWith('.mp3')) {
+        _songs.add(entity);
       }
-    } catch (e) {
-      print("Error: $e");
     }
-    return mp3Files;
+    print(_songs);
+    print("\n");
+    print(" ${_songs.length} ++++ \n");
+    return _songs;
   }
 
   Future<bool> _requestPermission() async {

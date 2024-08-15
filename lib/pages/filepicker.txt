@@ -1,0 +1,27 @@
+FilePickerResult:
+
+
+What it is: A class that holds the result of a file picking operation.
+
+Purpose: It contains information about the files that were picked by the user. 
+When you call FilePicker.platform.pickFiles(), it returns a Future<FilePickerResult?>.
+
+Key Properties:
+ 1  files: A list of PlatformFile objects representing the files that were picked.
+
+
+
+PlatformFile:
+
+
+What it is: A class representing a file picked by the user, with platform-specific details.
+
+Purpose: It provides information about each individual file selected by the user.
+
+Key Properties:
+
+name: The name of the file.
+size: The size of the file in bytes.
+path: The file path as a String. This is null on web platforms.
+bytes: A Uint8List containing the file's bytes (if available).
+extension: The file extension (e.g., 'jpg', 'pdf').

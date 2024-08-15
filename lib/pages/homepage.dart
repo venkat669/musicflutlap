@@ -101,6 +101,14 @@ class _homepageState extends State<homepage> {
                 child: Text("second"),
               ),
             ),
+            Expanded(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/thirdpg');
+                },
+                child: Text("third"),
+              ),
+            ),
           ],
         ),
       ),
