@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:musicflutlap/pages/firstpage.dart';
+import 'package:musicflutlap/pages/forthpg.dart';
 import 'package:musicflutlap/pages/homepage.dart';
 import 'package:musicflutlap/pages/secondpage.dart';
 import 'package:musicflutlap/pages/thirdpg.dart';
@@ -26,6 +27,7 @@ class _MyAppState extends State<MyApp> {
         '/xylo': (context) => xylop(),
         '/second': (context) => SecondPage(),
         '/thirdpg': (context) => Thirdpg(),
+        '/forth': (context) => Mp3Scanner(),
       },
     );
   }
